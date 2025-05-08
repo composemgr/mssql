@@ -1,17 +1,52 @@
+# nginx proxy address - http://172.17.0.1:59085
+
 name: mssql
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
 services:
-  db:
-    image: mcr.microsoft.com/mssql/server:latest
-    container_name: mssql
-    hostname: mssql
+  admin:
+    image: adminer:latest
+    container_name: mssql-admin
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
     restart: always
     pull_policy: always
+    logging: *default-logging
+    environment:
+      - TZ=${TZ:-America/New_York}
+      - ADMINER_DESIGN=dracula
+      - ADMINER_DEFAULT_DB_DRIVER=mssql
+      - ADMINER_DEFAULT_DB_HOST=mssql-server
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 172.17.0.1:59085:8080
+    extra_hosts:
+      - 'localhost:172.17.0.1'
+      - 'mssqldb:host-gateway'
+      - 'mssql-server:host-gateway'
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - mssql
+
+  db:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: mssql-server
+    hostname: mssql-server
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      ACCEPT_EULA: 'Y'
+      MSSQL_PID: ${MSSQL_PRODUCT_ID:-Developer}
+      SA_PASSWORD: '${DB_ADMIN_PASS:-JdkqNdoKzscwdPqOJ6V1ciTbrxRLzepk}'
     ports:
       - '1433:1433'
-    environment:
-      ACCEPT_EULA: 'Y'
-      SA_PASSWORD: '${DB_ADMIN_PASS}'
-      MSSQL_PID: ${MSSQL_PRODUCT_ID:-Developer}
     volumes:
       - /var/lib/srv/$USER/docker/mssql/server/latest/rootfs/data/db/mssql:/var/opt/sqlserver
       - /var/lib/srv/$USER/docker/mssql/server/latest/rootfs/config/mssql/initdb:/usr/src/app/docker-entrypoint-initdb.d
@@ -24,28 +59,7 @@ services:
     extra_hosts:
       - 'localhost:172.17.0.1'
       - 'mssqldb:host-gateway'
-      - 'host.docker.internal:host-gateway'
-    networks:
-      - mssql
-
-  admin:
-    image: adminer:latest
-    container_name: mssql-admin
-    hostname: adminer
-    restart: always
-    pull_policy: always
-    environment:
-      - ADMINER_DESIGN=dracula
-      - ADMINER_DEFAULT_DB_DRIVER=mssql
-      - ADMINER_DEFAULT_DB_HOST=mssqldb
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - 172.17.0.1:59085:8080
-    extra_hosts:
-      - 'localhost:172.17.0.1'
-      - 'mssqldb:host-gateway'
+      - 'mssql-server:host-gateway'
       - 'host.docker.internal:host-gateway'
     networks:
       - mssql
