@@ -48,7 +48,7 @@ services:
     ports:
       - '1433:1433'
     volumes:
-      - './rootfs/db/mssql:/var/opt/sqlserver'
+      - './rootfs/data/db/mssql:/var/opt/sqlserver'
       - './rootfs/config/mssql/initdb:/usr/src/app/docker-entrypoint-initdb.d'
     healthcheck:
       test: bash -c 'pidof -q sqlservr;exit $?'
