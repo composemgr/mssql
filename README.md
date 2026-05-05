@@ -46,8 +46,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/db/mssql` - Data storage
-- `./rootfs/config/mssql/initdb` - Data storage
+- `./volumes/data/db/mssql` - Data storage
+- `./volumes/config/mssql/initdb` - Data storage
 
 ## 🔍 Logging
 
