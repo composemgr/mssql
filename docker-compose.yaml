@@ -65,11 +65,11 @@ services:
       CONTAINER_NAME: mssql-server
       ACCEPT_EULA: Y
       MSSQL_PID: ${MSSQL_PRODUCT_ID:-Developer}
-      SA_PASSWORD: ${DB_ADMIN_PASS:-changeme_admin_password}
+      MSSQL_SA_PASSWORD: ${DB_ADMIN_PASS:-changeme_admin_password}
     ports:
       - '1433:1433'
     volumes:
-      - './volumes/data/db/mssql:/var/opt/sqlserver'
+      - './volumes/data/db/mssql:/var/opt/mssql'
       - './volumes/config/mssql/initdb:/usr/src/app/docker-entrypoint-initdb.d'
     healthcheck:
       test: bash -c 'pidof -q sqlservr;exit $?'
